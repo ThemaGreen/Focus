@@ -1,0 +1,2672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Guardian - Enhanced Timer Experience</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --primary-dark: #3a0ca3;
+            --secondary: #7209b7;
+            --accent: #f72585;
+            --success: #4cc9f0;
+            --warning: #f9c74f;
+            --danger: #f94144;
+            --surface: #ffffff;
+            --background: #f8f9fa;
+            --background-elevated: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --text-tertiary: #adb5bd;
+            --border: #e9ecef;
+            --border-light: #f1f3f5;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            --surface: #1a1d21;
+            --background: #121417;
+            --background-elevated: #1a1d21;
+            --text-primary: #f8f9fa;
+            --text-secondary: #adb5bd;
+            --text-tertiary: #6c757d;
+            --border: #2d3239;
+            --border-light: #23272e;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.25);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--background);
+            color: var(--text-primary);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-weight: 400;
+            line-height: 1.6;
+            padding: 0;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+
+        /* Header with adaptive behavior */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light);
+            padding: 16px 0;
+            transition: var(--transition);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: 700;
+            font-size: 20px;
+            transition: var(--transition);
+        }
+
+        .logo:hover .logo-icon {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        /* Page container */
+        .page-container {
+            min-height: calc(100vh - 100px);
+            padding: 40px 0;
+        }
+
+        .page {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: var(--transition-slow);
+        }
+
+        .page.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Home page */
+        .hero {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 0 20px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        /* Dashboard with adaptive cards */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-light);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Grid layout for different card sizes */
+        .card-large {
+            grid-column: span 8;
+        }
+
+        .card-medium {
+            grid-column: span 6;
+        }
+
+        .card-small {
+            grid-column: span 4;
+        }
+
+        @media (max-width: 1024px) {
+            .card-large {
+                grid-column: span 12;
+            }
+            
+            .card-medium {
+                grid-column: span 6;
+            }
+            
+            .card-small {
+                grid-column: span 6;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .card-medium, .card-small {
+                grid-column: span 12;
+            }
+        }
+
+        /* Stats with animated progress */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            background: var(--background-elevated);
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            background: var(--background);
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Progress visualization */
+        .progress-container {
+            height: 8px;
+            background: var(--border-light);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 12px 0;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-light), var(--primary));
+            border-radius: 4px;
+            transition: width 1s ease-in-out;
+            width: 0;
+        }
+
+        .progress-bar.animated {
+            width: var(--progress-width, 72%);
+        }
+
+        /* Feature list with interactive items */
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-item {
+            padding: 16px;
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: var(--transition);
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .feature-item:hover {
+            background: var(--background-elevated);
+            border-color: var(--border);
+            transform: translateX(4px);
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(67, 97, 238, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            flex-shrink: 0;
+        }
+
+        .feature-content {
+            flex: 1;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .feature-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Interactive demo section */
+        .demo-section {
+            margin: 60px 0;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--text-primary);
+        }
+
+        .demo-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .demo-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .demo-card-header {
+            padding: 20px;
+            background: var(--primary);
+            color: white;
+            text-align: center;
+        }
+
+        .demo-card-content {
+            padding: 24px;
+        }
+
+        .demo-card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .demo-card-desc {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        /* Enhanced buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            text-decoration: none;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(67, 97, 238, 0.35);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary-light);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(67, 97, 238, 0.05);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 40px 0;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer-text {
+            color: var(--text-secondary);
+        }
+
+        .footer-badges {
+            display: flex;
+            gap: 12px;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--background);
+            color: var(--text-secondary);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background: var(--background);
+        }
+
+        /* Health & Wellness Page */
+        .health-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 30px;
+        }
+
+        .health-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            border: 1px solid var(--border-light);
+        }
+
+        .health-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .health-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .health-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(67, 97, 238, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .fact-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .fact-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-list {
+            list-style: none;
+        }
+
+        .suggestion-item {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .suggestion-bullet {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Focus Session Page */
+        .focus-session {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .timer-display {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 40px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        /* Enhanced Custom Timer Styles */
+        .timer-wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 30px;
+            touch-action: none;
+        }
+        
+        .timer-wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--primary) 0%, 
+                var(--primary-light) 20%, 
+                var(--secondary) 40%, 
+                var(--accent) 60%, 
+                var(--success) 80%, 
+                var(--primary) 100%
+            );
+            position: relative;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .timer-wheel-inner {
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            background: var(--surface);
+            border-radius: 50%;
+            top: 10%;
+            left: 10%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .timer-wheel-handle {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: var(--surface);
+            border-radius: 50%;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            z-index: 10;
+            border: 2px solid var(--primary);
+        }
+        
+        .timer-wheel-handle:active {
+            cursor: grabbing;
+        }
+        
+        .timer-wheel-markers {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+        
+        .timer-wheel-marker {
+            position: absolute;
+            width: 2px;
+            height: 15px;
+            background: var(--text-tertiary);
+            left: 50%;
+            transform-origin: bottom center;
+        }
+        
+        .timer-wheel-marker.major {
+            height: 20px;
+            background: var(--text-secondary);
+            width: 3px;
+        }
+        
+        /* Sound Options Styles */
+        .sound-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+        
+        .sound-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            background: var(--background);
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .sound-option:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+        
+        .sound-option.selected {
+            border-color: var(--primary);
+            background: rgba(67, 97, 238, 0.05);
+        }
+        
+        .sound-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+        
+        /* Break Settings Styles */
+        .break-settings {
+            margin: 20px 0;
+        }
+        
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .setting-label {
+            flex: 1;
+        }
+        
+        .setting-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .number-input {
+            width: 60px;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-primary);
+            text-align: center;
+        }
+        
+        .frequency-options {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .frequency-option {
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            background: var(--background);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        
+        .frequency-option.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* Enhanced Timer Display */
+        .timer-display-container {
+            position: relative;
+            margin: 30px 0;
+        }
+        
+        .timer-mode-indicator {
+            position: absolute;
+            top: -30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .timer-progress-ring {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 220px;
+            height: 220px;
+            z-index: -1;
+        }
+        
+        .timer-progress-ring circle {
+            fill: none;
+            stroke: var(--primary-light);
+            stroke-width: 4;
+            stroke-linecap: round;
+            opacity: 0.2;
+            transition: stroke-dashoffset 1s linear;
+        }
+        
+        .timer-progress-ring .progress {
+            opacity: 1;
+            stroke: var(--primary);
+        }
+        
+        /* Focus Sounds Player */
+        .sound-player {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            padding: 16px;
+            background: var(--background);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+        }
+        
+        .sound-player-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            outline: none;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+        }
+        
+        /* Session History */
+        .session-history {
+            margin-top: 30px;
+        }
+        
+        .session-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            background: var(--background);
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .session-duration {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .session-time {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Custom Timer Presets */
+        .timer-presets {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .timer-preset {
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            background: var(--background);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .timer-preset:hover {
+            border-color: var(--primary-light);
+        }
+        
+        .timer-preset.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .timer-wheel-container {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .timer-progress-ring {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .sound-options {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .setting-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            .setting-control {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+        
+        /* Animation for timer completion */
+        @keyframes timerComplete {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .timer-complete {
+            animation: timerComplete 0.5s ease-in-out 3;
+        }
+        
+        /* Gesture hint */
+        .gesture-hint {
+            text-align: center;
+            margin-top: 10px;
+            color: var(--text-tertiary);
+            font-size: 0.9rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-lg);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .session-type-selector {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .session-type {
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            background: var(--background);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .session-type.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        /* Settings Page */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .setting-group {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border);
+            transition: var(--transition);
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: var(--transition);
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Stats Page */
+        .stats-chart {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 24px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stats-filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <header>
+        <div class="header-content">
+            <a href="#" class="logo" onclick="showPage('home')">
+                <div class="logo-icon">F</div>
+                <span class="logo-text">Focus Guardian</span>
+            </a>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="btn btn-secondary" onclick="showPage('health')">Health</button>
+                <button class="btn btn-secondary" onclick="showPage('settings')">Settings</button>
+                <button class="btn btn-primary" onclick="startFocusSession()">Start Focus</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <div class="page-container">
+            <!-- Home Page -->
+            <div id="page-home" class="page active">
+                <section class="hero animate-in">
+                    <h1>Reclaim your focus,<br>one mindful moment at a time</h1>
+                    <p>Focus Guardian helps you build healthier digital habits with intelligent reminders, personalized insights, and science-backed interventions.</p>
+                    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="startFocusSession()">Start Focus Session</button>
+                        <button class="btn btn-secondary" onclick="showPage('health')">Health Tips</button>
+                        <button class="btn btn-secondary" onclick="showPage('stats')">View Stats</button>
+                    </div>
+                </section>
+
+                <section class="dashboard">
+                    <div class="card card-large animate-in" style="animation-delay: 0.1s;">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fas fa-chart-line"></i> Your Focus Journey</h2>
+                            <div class="card-actions">
+                                <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">Week</button>
+                                <button class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">Month</button>
+                            </div>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value">72%</div>
+                                <div class="stat-label">More focused this week</div>
+                                <div class="progress-container">
+                                    <div class="progress-bar animated" style="--progress-width: 72%;"></div>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">3.2h</div>
+                                <div class="stat-label">Time saved from distractions</div>
+                                <div class="progress-container">
+                                    <div class="progress-bar animated" style="--progress-width: 64%;"></div>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">14</div>
+                                <div class="stat-label">Mindful interventions</div>
+                                <div class="progress-container">
+                                    <div class="progress-bar animated" style="--progress-width: 47%;"></div>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">42%</div>
+                                <div class="stat-label">Fewer distractions today</div>
+                                <div class="progress-container">
+                                    <div class="progress-bar animated" style="--progress-width: 42%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-medium animate-in" style="animation-delay: 0.2s;">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fas fa-bolt"></i> Quick Actions</h2>
+                        </div>
+                        <div style="display: grid; gap: 12px;">
+                            <button class="btn btn-secondary" style="justify-content: start;" onclick="startFocusSession()">
+                                <i class="fas fa-moon" style="font-size: 1.2rem;"></i>
+                                Start Focus Session
+                            </button>
+                            <button class="btn btn-secondary" style="justify-content: start;" onclick="showPage('settings')">
+                                <i class="fas fa-clock" style="font-size: 1.2rem;"></i>
+                                Set Time Limits
+                            </button>
+                            <button class="btn btn-secondary" style="justify-content: start;" onclick="showPage('health')">
+                                <i class="fas fa-heartbeat" style="font-size: 1.2rem;"></i>
+                                Health & Wellness
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card card-small animate-in" style="animation-delay: 0.3s;">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fas fa-trophy"></i> Achievements</h2>
+                        </div>
+                        <div style="text-align: center; padding: 20px 0;">
+                            <div style="font-size: 3rem; color: var(--warning); margin-bottom: 10px;">
+                                <i class="fas fa-medal"></i>
+                            </div>
+                            <h3 style="margin-bottom: 8px;">Focus Champion</h3>
+                            <p style="color: var(--text-secondary);">7-day streak! Keep it going.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="demo-section">
+                    <h2 class="section-title">Experience Focus Guardian</h2>
+                    <div class="demo-cards">
+                        <div class="demo-card animate-in" style="animation-delay: 0.4s;" onclick="showMindfulReminder()">
+                            <div class="demo-card-header">
+                                <h3>Mindful Browsing</h3>
+                            </div>
+                            <div class="demo-card-content">
+                                <h4 class="demo-card-title">Gentle Time Reminders</h4>
+                                <p class="demo-card-desc">Receive thoughtful notifications when you've spent extended time on distracting sites, helping you make conscious choices.</p>
+                                <button class="btn btn-secondary">Try It Now</button>
+                            </div>
+                        </div>
+
+                        <div class="demo-card animate-in" style="animation-delay: 0.5s;" onclick="startFocusSession()">
+                            <div class="demo-card-header" style="background: var(--secondary);">
+                                <h3>Focus Sessions</h3>
+                            </div>
+                            <div class="demo-card-content">
+                                <h4 class="demo-card-title">Deep Work Mode</h4>
+                                <p class="demo-card-desc">Block distractions and create an optimal environment for focused work with customizable session settings.</p>
+                                <button class="btn btn-secondary">Try It Now</button>
+                            </div>
+                        </div>
+
+                        <div class="demo-card animate-in" style="animation-delay: 0.6s;" onclick="showPage('health')">
+                            <div class="demo-card-header" style="background: var(--accent);">
+                                <h3>Digital Wellness</h3>
+                            </div>
+                            <div class="demo-card-content">
+                                <h4 class="demo-card-title">Healthy Digital Habits</h4>
+                                <p class="demo-card-desc">Learn about the impact of excessive scrolling and discover healthier alternatives for your free time.</p>
+                                <button class="btn btn-secondary">Learn More</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card animate-in" style="animation-delay: 0.7s;">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-star"></i> Why It Works</h2>
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item" onclick="showResearchModal('neuroscience')">
+                            <div class="feature-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <div class="feature-content">
+                                <h3 class="feature-title">Based on Neuroscience</h3>
+                                <p class="feature-desc">Uses proven techniques from behavioral psychology to help reshape your digital habits effectively.</p>
+                            </div>
+                        </li>
+                        <li class="feature-item" onclick="showResearchModal('adaptation')">
+                            <div class="feature-icon">
+                                <i class="fas fa-user-cog"></i>
+                            </div>
+                            <div class="feature-content">
+                                <h3 class="feature-title">Adapts to You</h3>
+                                <p class="feature-desc">Learns your patterns and customizes interventions to work with your unique behavior and preferences.</p>
+                            </div>
+                        </li>
+                        <li class="feature-item" onclick="showResearchModal('privacy')">
+                            <div class="feature-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="feature-content">
+                                <h3 class="feature-title">Privacy First</h3>
+                                <p class="feature-desc">Your data stays on your device. We never sell or share your personal information.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+
+            <!-- Health & Wellness Page -->
+            <div id="page-health" class="page">
+                <h1 class="section-title">Digital Wellness & Health</h1>
+                <p style="text-align: center; margin-bottom: 40px; max-width: 800px; margin-left: auto; margin-right: auto; color: var(--text-secondary);">
+                    Understanding the impact of excessive screen time and social media use is the first step toward building healthier digital habits.
+                </p>
+
+                <div class="health-grid">
+                    <div class="health-card animate-in">
+                        <div class="health-card-header">
+                            <div class="health-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h2 class="card-title">The Science of Scrolling Addiction</h2>
+                        </div>
+                        <div class="health-card-content">
+                            <div class="fact-item">
+                                <h3>Dopamine Loops</h3>
+                                <p>Social media platforms are designed to trigger dopamine release, creating addictive feedback loops that keep you scrolling.</p>
+                            </div>
+                            <div class="fact-item">
+                                <h3>Attention Span Impact</h3>
+                                <p>Studies show heavy social media users have significantly reduced attention spans compared to moderate users.</p>
+                            </div>
+                            <div class="fact-item">
+                                <h3>Sleep Disruption</h3>
+                                <p>Blue light from screens and mental stimulation from social media can disrupt sleep patterns and quality.</p>
+                            </div>
+                            <div class="fact-item">
+                                <h3>Comparison Culture</h3>
+                                <p>Constant exposure to curated lives on social media increases anxiety and decreases life satisfaction.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="health-card animate-in">
+                        <div class="health-card-header">
+                            <div class="health-icon">
+                                <i class="fas fa-heartbeat"></i>
+                            </div>
+                            <h2 class="card-title">Healthier Alternatives</h2>
+                        </div>
+                        <div class="health-card-content">
+                            <ul class="suggestion-list">
+                                <li class="suggestion-item">
+                                    <div class="suggestion-bullet">1</div>
+                                    <div>
+                                        <h3>Mindful Reading</h3>
+                                        <p>Replace scrolling with reading physical books or long-form articles to improve focus and comprehension.</p>
+                                    </div>
+                                </li>
+                                <li class="suggestion-item">
+                                    <div class="suggestion-bullet">2</div>
+                                    <div>
+                                        <h3>Creative Hobbies</h3>
+                                        <p>Engage in hands-on activities like drawing, writing, or playing an instrument to stimulate creativity.</p>
+                                    </div>
+                                </li>
+                                <li class="suggestion-item">
+                                    <div class="suggestion-bullet">3</div>
+                                    <div>
+                                        <h3>Physical Activity</h3>
+                                        <p>Take short walks, stretch, or do quick exercises during breaks instead of reaching for your phone.</p>
+                                    </div>
+                                </li>
+                                <li class="suggestion-item">
+                                    <div class="suggestion-bullet">4</div>
+                                    <div>
+                                        <h3>Social Connection</h3>
+                                        <p>Replace digital interactions with face-to-face conversations or phone calls with friends and family.</p>
+                                    </div>
+                                </li>
+                                <li class="suggestion-item">
+                                    <div class="suggestion-bullet">5</div>
+                                    <div>
+                                        <h3>Nature Time</h3>
+                                        <p>Spend time outdoors without devices to reduce stress and improve mental clarity.</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="health-card animate-in">
+                        <div class="health-card-header">
+                            <div class="health-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h2 class="card-title">Digital Detox Strategies</h2>
+                        </div>
+                        <div class="health-card-content">
+                            <div class="fact-item">
+                                <h3>Scheduled Screen Time</h3>
+                                <p>Designate specific times for social media use rather than checking constantly throughout the day.</p>
+                            </div>
+                            <div class="fact-item">
+                                <h3>App Limitations</h3>
+                                <p>Use built-in screen time controls to set daily limits for social media apps.</p>
+                            </div>
+                            <div class="fact-item">
+                                <h3>Notification Management</h3>
+                                <p>Turn off non-essential notifications to reduce interruptions and compulsive checking.</p>
+                            </div>
+                            <div class="fact-item">
+                                <h3>Phone-Free Zones</h3>
+                                <p>Establish areas in your home (like bedrooms) where phones are not allowed.</p>
+                            </div>
+                            <div class="fact-item">
+                                <h3>Mindful Consumption</h3>
+                                <p>Before opening an app, ask yourself: "What specific purpose does this serve right now?"</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="health-card animate-in">
+                        <div class="health-card-header">
+                            <div class="health-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <h2 class="card-title">Quick Wellness Tips</h2>
+                        </div>
+                        <div class="health-card-content">
+                            <ul class="suggestion-list">
+                                <li class="suggestion-item">
+                                    <div class="suggestion-bullet"><i class="fas fa-sun"></i></div>
+                                    <div>
+                                        <h3>Morning Routine</h3>
+                                        <p>Avoid checking your phone for the first 30 minutes after waking up.</p>
+                                    </div>
+                                </li>
+                                <li class="suggestion-item">
+                                    <div class="suggestion-bullet"><i class="fas fa-utensils"></i></div>
+                                    <div>
+                                        <h3>Mealtime Rules</h3>
+                                        <p>Keep devices away during meals to practice mindful eating.</p>
+                                    </div>
+                                </li>
+                                <li class="suggestion-item">
+                                    <div class="suggestion-bullet"><i class="fas fa-bed"></i></div>
+                                    <div>
+                                        <h3>Bedtime Buffer</h3>
+                                        <p>Stop using screens at least one hour before bedtime.</p>
+                                    </div>
+                                </li>
+                                <li class="suggestion-item">
+                                    <div class="suggestion-bullet"><i class="fas fa-walking"></i></div>
+                                    <div>
+                                        <h3>Movement Breaks</h3>
+                                        <p>Take a 5-minute movement break every hour instead of scrolling.</p>
+                                    </div>
+                                </li>
+                                <li class="suggestion-item">
+                                    <div class="suggestion-bullet"><i class="fas fa-book"></i></div>
+                                    <div>
+                                        <h3>Reading Challenge</h3>
+                                        <p>Replace 15 minutes of social media time with reading each day.</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 40px;">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-seedling"></i> Start Your Digital Wellness Journey</h2>
+                    </div>
+                    <div style="padding: 20px; text-align: center;">
+                        <p style="margin-bottom: 20px; color: var(--text-secondary);">Ready to take control of your digital habits? Start with small, consistent changes.</p>
+                        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                            <button class="btn btn-primary" onclick="startFocusSession()">Start Focus Session</button>
+                            <button class="btn btn-secondary" onclick="showPage('settings')">Set App Limits</button>
+                            <button class="btn btn-secondary" onclick="showModal('Daily Challenge', generateDailyChallenge())">Get Daily Challenge</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Focus Session Page -->
+            <div id="page-focus" class="page">
+                <div class="focus-session">
+                    <h1 class="section-title">Focus Session</h1>
+                    
+                    <div class="timer-presets">
+                        <div class="timer-preset active" data-minutes="25">Pomodoro (25m)</div>
+                        <div class="timer-preset" data-minutes="50">Deep Work (50m)</div>
+                        <div class="timer-preset" data-minutes="90">Extended (90m)</div>
+                        <div class="timer-preset" onclick="showCustomTimerModal()">Custom</div>
+                    </div>
+                    
+                    <div class="timer-display-container">
+                        <div class="timer-mode-indicator" id="timer-mode">FOCUS TIME</div>
+                        <div class="timer-display" id="timer-display">25:00</div>
+                        <svg class="timer-progress-ring" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="45"></circle>
+                            <circle class="progress" cx="50" cy="50" r="45" id="progress-ring"></circle>
+                        </svg>
+                    </div>
+                    
+                    <div class="timer-controls">
+                        <button class="btn btn-primary" id="start-btn" onclick="startTimer()">
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                        <button class="btn btn-secondary" id="pause-btn" onclick="pauseTimer()" disabled>
+                            <i class="fas fa-pause"></i> Pause
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetTimer()">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                        <button class="btn btn-secondary" onclick="skipBreak()" id="skip-break-btn" style="display: none;">
+                            <i class="fas fa-forward"></i> Skip Break
+                        </button>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fas fa-magic"></i> Session Tools</h2>
+                        </div>
+                        <div style="display: grid; gap: 12px;">
+                            <button class="btn btn-secondary" style="justify-content: start;" onclick="enableWebsiteBlocking()">
+                                <i class="fas fa-ban"></i> Block Distracting Sites
+                            </button>
+                            <button class="btn btn-secondary" style="justify-content: start;" onclick="showFocusSoundsModal()">
+                                <i class="fas fa-music"></i> Focus Sounds
+                            </button>
+                            <button class="btn btn-secondary" style="justify-content: start;" onclick="showBreakSettingsModal()">
+                                <i class="fas fa-bell"></i> Break Settings
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="session-history">
+                        <h3 class="card-title"><i class="fas fa-history"></i> Recent Sessions</h3>
+                        <div id="session-list">
+                            <!-- Session history will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="page-settings" class="page">
+                <h1 class="section-title">Settings</h1>
+                
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <h2 class="card-title"><i class="fas fa-sliders-h"></i> General</h2>
+                        
+                        <div class="setting-item">
+                            <div>
+                                <h3>Focus Reminders</h3>
+                                <p>Get gentle reminders to stay focused</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div>
+                                <h3>Break Suggestions</h3>
+                                <p>Suggest breaks after long sessions</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div>
+                                <h3>Daily Goals</h3>
+                                <p>Set and track daily focus goals</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <h2 class="card-title"><i class="fas fa-shield-alt"></i> Privacy</h2>
+                        
+                        <div class="setting-item">
+                            <div>
+                                <h3>Data Collection</h3>
+                                <p>Help improve Focus Guardian anonymously</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div>
+                                <h3>Usage Analytics</h3>
+                                <p>Track usage patterns to personalize experience</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <h2 class="card-title"><i class="fas fa-bell"></i> Notifications</h2>
+                        
+                        <div class="setting-item">
+                            <div>
+                                <h3>Sound Alerts</h3>
+                                <p>Play sounds for notifications</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div>
+                                <h3>Desktop Notifications</h3>
+                                <p>Show browser notifications</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <h2 class="card-title"><i class="fas fa-palette"></i> Appearance</h2>
+                        
+                        <div class="setting-item">
+                            <div>
+                                <h3>Dark Mode</h3>
+                                <p>Use dark theme</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="dark-mode-toggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div>
+                                <h3>Reduced Motion</h3>
+                                <p>Minimize animations</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Page -->
+            <div id="page-stats" class="page">
+                <h1 class="section-title">Your Focus Statistics</h1>
+                
+                <div class="stats-filters">
+                    <button class="btn btn-primary">Today</button>
+                    <button class="btn btn-secondary">Week</button>
+                    <button class="btn btn-secondary">Month</button>
+                    <button class="btn btn-secondary">All Time</button>
+                </div>
+                
+                <div class="stats-chart">
+                    <p style="color: var(--text-secondary);">Focus time chart visualization would appear here</p>
+                </div>
+                
+                <div class="dashboard">
+                    <div class="card card-large">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fas fa-chart-pie"></i> Time Distribution</h2>
+                        </div>
+                        <div style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                            <p style="color: var(--text-secondary);">Time distribution chart would appear here</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card card-medium">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="fas fa-tachometer-alt"></i> Productivity Score</h2>
+                        </div>
+                        <div style="text-align: center; padding: 30px 0;">
+                            <div style="font-size: 3rem; font-weight: 700; color: var(--primary);">76%</div>
+                            <p style="color: var(--text-secondary);">+12% from last week</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Custom Timer Modal -->
+    <div class="modal-overlay" id="custom-timer-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Custom Timer</h2>
+                <button class="modal-close" onclick="closeCustomTimerModal()">&times;</button>
+            </div>
+            <div class="modal-content">
+                <p style="text-align: center; margin-bottom: 20px;">Drag the handle to set your focus duration</p>
+                
+                <div class="timer-wheel-container" id="timer-wheel-container">
+                    <div class="timer-wheel" id="timer-wheel">
+                        <div class="timer-wheel-inner">
+                            <div id="wheel-timer-display" style="font-size: 2rem; font-weight: 700;">25:00</div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary);">minutes</div>
+                        </div>
+                        <div class="timer-wheel-handle" id="timer-wheel-handle">
+                            <i class="fas fa-grip-lines"></i>
+                        </div>
+                        <div class="timer-wheel-markers" id="timer-wheel-markers"></div>
+                    </div>
+                </div>
+                
+                <div class="gesture-hint">
+                    <i class="fas fa-hand-pointer"></i> Drag the handle or tap on the wheel to set time
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" style="flex: 1;" onclick="closeCustomTimerModal()">Cancel</button>
+                    <button class="btn btn-primary" style="flex: 1;" onclick="applyCustomTime()">Set Timer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Focus Sounds Modal -->
+    <div class="modal-overlay" id="focus-sounds-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Focus Sounds</h2>
+                <button class="modal-close" onclick="closeFocusSoundsModal()">&times;</button>
+            </div>
+            <div class="modal-content">
+                <p>Select ambient sounds to enhance your focus (optional):</p>
+                
+                <div class="sound-options">
+                    <div class="sound-option" data-sound="none" onclick="selectSoundOption(this)">
+                        <div class="sound-icon"><i class="fas fa-volume-mute"></i></div>
+                        <div class="sound-label">No Sound</div>
+                    </div>
+                    <div class="sound-option" data-sound="rain" onclick="selectSoundOption(this)">
+                        <div class="sound-icon"><i class="fas fa-cloud-rain"></i></div>
+                        <div class="sound-label">Rainfall</div>
+                    </div>
+                    <div class="sound-option" data-sound="forest" onclick="selectSoundOption(this)">
+                        <div class="sound-icon"><i class="fas fa-tree"></i></div>
+                        <div class="sound-label">Forest</div>
+                    </div>
+                    <div class="sound-option" data-sound="coffee" onclick="selectSoundOption(this)">
+                        <div class="sound-icon"><i class="fas fa-coffee"></i></div>
+                        <div class="sound-label">Coffee Shop</div>
+                    </div>
+                    <div class="sound-option" data-sound="waves" onclick="selectSoundOption(this)">
+                        <div class="sound-icon"><i class="fas fa-water"></i></div>
+                        <div class="sound-label">Ocean Waves</div>
+                    </div>
+                    <div class="sound-option" data-sound="lofi" onclick="selectSoundOption(this)">
+                        <div class="sound-icon"><i class="fas fa-headphones"></i></div>
+                        <div class="sound-label">Lofi Beats</div>
+                    </div>
+                </div>
+                
+                <div class="sound-player" id="sound-player" style="display: none;">
+                    <button class="btn btn-secondary" id="play-pause-sound">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <div style="flex: 1;">
+                        <div id="now-playing">Now Playing: Rainfall</div>
+                        <input type="range" min="0" max="100" value="50" class="volume-slider" id="volume-slider">
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" style="flex: 1;" onclick="closeFocusSoundsModal()">Cancel</button>
+                    <button class="btn btn-primary" style="flex: 1;" onclick="applyFocusSound()">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Break Settings Modal -->
+    <div class="modal-overlay" id="break-settings-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Break Settings</h2>
+                <button class="modal-close" onclick="closeBreakSettingsModal()">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div class="break-settings">
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <h3>Break Duration</h3>
+                            <p>How long your breaks should be</p>
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" min="1" max="30" value="5" class="number-input" id="break-duration">
+                            <span>minutes</span>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <h3>Reminder Frequency</h3>
+                            <p>How often to remind you to take breaks</p>
+                        </div>
+                        <div class="setting-control">
+                            <div class="frequency-options">
+                                <div class="frequency-option selected" data-minutes="25">25m</div>
+                                <div class="frequency-option" data-minutes="45">45m</div>
+                                <div class="frequency-option" data-minutes="60">60m</div>
+                                <div class="frequency-option" onclick="showCustomFrequency()">Custom</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-row" id="custom-frequency-row" style="display: none;">
+                        <div class="setting-label">
+                            <h3>Custom Frequency</h3>
+                            <p>Set your own reminder interval</p>
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" min="5" max="120" value="30" class="number-input" id="custom-frequency">
+                            <span>minutes</span>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-row">
+                        <div class="setting-label">
+                            <h3>Auto-start Breaks</h3>
+                            <p>Automatically start break timer after focus sessions</p>
+                        </div>
+                        <div class="setting-control">
+                            <label class="switch">
+                                <input type="checkbox" id="auto-start-breaks" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" style="flex: 1;" onclick="closeBreakSettingsModal()">Cancel</button>
+                    <button class="btn btn-primary" style="flex: 1;" onclick="saveBreakSettings()">Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Template -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Modal Title</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modal-content">
+                <p>Modal content will appear here.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <p class="footer-text">© 2025 Focus Guardian — Designed with purpose</p>
+            <div class="footer-badges">
+                <span class="badge"><i class="fas fa-lock"></i> Privacy First</span>
+                <span class="badge"><i class="fas fa-heart"></i> User-Centered</span>
+                <span class="badge"><i class="fas fa-leaf"></i> Ethical Design</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme Management
+        const themeToggle = document.getElementById('theme-toggle');
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+            updateThemeToggle(savedTheme);
+            
+            if (darkModeToggle) {
+                darkModeToggle.checked = savedTheme === 'dark';
+            }
+        }
+        
+        function toggleTheme() {
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeToggle(newTheme);
+            
+            if (darkModeToggle) {
+                darkModeToggle.checked = newTheme === 'dark';
+            }
+        }
+        
+        function updateThemeToggle(theme) {
+            const icon = themeToggle.querySelector('i');
+            if (theme === 'dark') {
+                icon.className = 'fas fa-sun';
+                themeToggle.setAttribute('title', 'Switch to light mode');
+            } else {
+                icon.className = 'fas fa-moon';
+                themeToggle.setAttribute('title', 'Switch to dark mode');
+            }
+        }
+        
+        themeToggle.addEventListener('click', toggleTheme);
+        
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('change', function() {
+                toggleTheme();
+            });
+        }
+
+        // Enhanced Timer Functionality
+        let timerInterval;
+        let timerRunning = false;
+        let timerSeconds = 25 * 60;
+        let isBreakTime = false;
+        let breakDuration = 5 * 60;
+        let breakFrequency = 25 * 60;
+        let autoStartBreaks = true;
+        let sessionHistory = [];
+        let selectedSound = 'none';
+        let soundPlaying = false;
+
+        // Timer wheel functionality
+        let wheelDragging = false;
+        let wheelValue = 25; // minutes
+
+        function initializeTimerWheel() {
+            const wheel = document.getElementById('timer-wheel');
+            const handle = document.getElementById('timer-wheel-handle');
+            const markers = document.getElementById('timer-wheel-markers');
+            
+            // Create markers for the wheel
+            for (let i = 0; i < 60; i++) {
+                const marker = document.createElement('div');
+                marker.className = 'timer-wheel-marker';
+                if (i % 5 === 0) {
+                    marker.classList.add('major');
+                }
+                marker.style.transform = `rotate(${i * 6}deg) translateY(-140px)`;
+                markers.appendChild(marker);
+            }
+            
+            // Mouse events for desktop
+            wheel.addEventListener('mousedown', startWheelDrag);
+            document.addEventListener('mousemove', handleWheelDrag);
+            document.addEventListener('mouseup', stopWheelDrag);
+            
+            // Touch events for mobile
+            wheel.addEventListener('touchstart', startWheelDrag);
+            document.addEventListener('touchmove', handleWheelDrag);
+            document.addEventListener('touchend', stopWheelDrag);
+            
+            // Click on wheel to set time
+            wheel.addEventListener('click', handleWheelClick);
+        }
+        
+        function startWheelDrag(e) {
+            wheelDragging = true;
+            updateWheelValue(e);
+            e.preventDefault();
+        }
+        
+        function handleWheelDrag(e) {
+            if (!wheelDragging) return;
+            updateWheelValue(e);
+            e.preventDefault();
+        }
+        
+        function stopWheelDrag() {
+            wheelDragging = false;
+        }
+        
+        function handleWheelClick(e) {
+            updateWheelValue(e);
+        }
+        
+        function updateWheelValue(e) {
+            const wheel = document.getElementById('timer-wheel');
+            const rect = wheel.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            let clientX, clientY;
+            if (e.type.includes('touch')) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            const deltaX = clientX - centerX;
+            const deltaY = clientY - centerY;
+            let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+            
+            // Convert angle to 0-360 range
+            if (angle < 0) angle += 360;
+            
+            // Convert angle to minutes (0-120 minutes)
+            wheelValue = Math.round((angle / 360) * 120);
+            if (wheelValue === 0) wheelValue = 120;
+            
+            updateWheelDisplay();
+        }
+        
+        function updateWheelDisplay() {
+            const display = document.getElementById('wheel-timer-display');
+            const handle = document.getElementById('timer-wheel-handle');
+            
+            // Format time as MM:SS
+            const minutes = wheelValue;
+            display.textContent = `${minutes.toString().padStart(2, '0')}:00`;
+            
+            // Update handle position
+            const angle = (wheelValue / 120) * 360;
+            handle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+        }
+        
+        function showCustomTimerModal() {
+            document.getElementById('custom-timer-modal').classList.add('active');
+            initializeTimerWheel();
+        }
+        
+        function closeCustomTimerModal() {
+            document.getElementById('custom-timer-modal').classList.remove('active');
+        }
+        
+        function applyCustomTime() {
+            timerSeconds = wheelValue * 60;
+            updateTimerDisplay();
+            closeCustomTimerModal();
+            
+            // Update active preset
+            document.querySelectorAll('.timer-preset').forEach(preset => {
+                preset.classList.remove('active');
+            });
+        }
+
+        // Enhanced Timer Functions
+        function startTimer() {
+            if (!timerRunning) {
+                timerRunning = true;
+                document.getElementById('start-btn').disabled = true;
+                document.getElementById('pause-btn').disabled = false;
+                
+                // Update progress ring
+                updateProgressRing();
+                
+                timerInterval = setInterval(() => {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        updateTimerDisplay();
+                        updateProgressRing();
+                    } else {
+                        clearInterval(timerInterval);
+                        timerRunning = false;
+                        document.getElementById('start-btn').disabled = false;
+                        document.getElementById('pause-btn').disabled = true;
+                        
+                        handleTimerCompletion();
+                    }
+                }, 1000);
+            }
+        }
+        
+        function pauseTimer() {
+            if (timerRunning) {
+                clearInterval(timerInterval);
+                timerRunning = false;
+                document.getElementById('start-btn').disabled = false;
+                document.getElementById('pause-btn').disabled = true;
+            }
+        }
+        
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('pause-btn').disabled = true;
+            
+            // Reset to selected time
+            const selectedPreset = document.querySelector('.timer-preset.active');
+            if (selectedPreset) {
+                const minutes = parseInt(selectedPreset.getAttribute('data-minutes')) || 25;
+                timerSeconds = minutes * 60;
+            } else {
+                timerSeconds = 25 * 60;
+            }
+            
+            isBreakTime = false;
+            document.getElementById('timer-mode').textContent = 'FOCUS TIME';
+            document.getElementById('skip-break-btn').style.display = 'none';
+            updateTimerDisplay();
+            updateProgressRing();
+        }
+        
+        function handleTimerCompletion() {
+            if (!isBreakTime) {
+                // Focus session completed
+                addSessionToHistory(timerSeconds);
+                
+                // Show completion effect
+                document.getElementById('timer-display').classList.add('timer-complete');
+                setTimeout(() => {
+                    document.getElementById('timer-display').classList.remove('timer-complete');
+                }, 1500);
+                
+                if (autoStartBreaks) {
+                    // Start break automatically
+                    startBreak();
+                } else {
+                    // Show option to start break
+                    document.getElementById('skip-break-btn').style.display = 'inline-flex';
+                    document.getElementById('skip-break-btn').innerHTML = '<i class="fas fa-coffee"></i> Start Break';
+                    alert('Focus session completed! Take a break?');
+                }
+            } else {
+                // Break completed
+                alert('Break time is over! Ready for another focus session?');
+                resetTimer();
+            }
+        }
+        
+        function startBreak() {
+            isBreakTime = true;
+            timerSeconds = breakDuration;
+            document.getElementById('timer-mode').textContent = 'BREAK TIME';
+            document.getElementById('skip-break-btn').style.display = 'inline-flex';
+            updateTimerDisplay();
+            updateProgressRing();
+            startTimer();
+        }
+        
+        function skipBreak() {
+            if (isBreakTime) {
+                resetTimer();
+            } else {
+                startBreak();
+            }
+        }
+        
+        function updateProgressRing() {
+            const progressRing = document.getElementById('progress-ring');
+            const totalTime = isBreakTime ? breakDuration : (document.querySelector('.timer-preset.active') ? 
+                parseInt(document.querySelector('.timer-preset.active').getAttribute('data-minutes')) * 60 : 25 * 60);
+            const progress = 1 - (timerSeconds / totalTime);
+            const circumference = 2 * Math.PI * 45;
+            const offset = circumference - (progress * circumference);
+            
+            progressRing.style.strokeDasharray = circumference;
+            progressRing.style.strokeDashoffset = offset;
+        }
+        
+        function addSessionToHistory(duration) {
+            const now = new Date();
+            const session = {
+                duration: duration,
+                timestamp: now.toISOString(),
+                date: now.toLocaleDateString(),
+                time: now.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
+            };
+            
+            sessionHistory.unshift(session);
+            if (sessionHistory.length > 5) {
+                sessionHistory = sessionHistory.slice(0, 5);
+            }
+            
+            updateSessionHistoryDisplay();
+        }
+        
+        function updateSessionHistoryDisplay() {
+            const sessionList = document.getElementById('session-list');
+            sessionList.innerHTML = '';
+            
+            if (sessionHistory.length === 0) {
+                sessionList.innerHTML = '<p style="text-align: center; color: var(--text-tertiary); padding: 20px;">No sessions yet. Complete a focus session to see your history here.</p>';
+                return;
+            }
+            
+            sessionHistory.forEach(session => {
+                const minutes = Math.floor(session.duration / 60);
+                const seconds = session.duration % 60;
+                const sessionItem = document.createElement('div');
+                sessionItem.className = 'session-item';
+                sessionItem.innerHTML = `
+                    <div>
+                        <div class="session-duration">${minutes}:${seconds.toString().padStart(2, '0')}</div>
+                        <div class="session-time">${session.date} at ${session.time}</div>
+                    </div>
+                    <div style="color: var(--success);">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                `;
+                sessionList.appendChild(sessionItem);
+            });
+        }
+
+        // Enhanced Sound System
+        function showFocusSoundsModal() {
+            document.getElementById('focus-sounds-modal').classList.add('active');
+            
+            // Select the current sound option
+            document.querySelectorAll('.sound-option').forEach(option => {
+                if (option.getAttribute('data-sound') === selectedSound) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+            
+            // Show/hide sound player based on selection
+            toggleSoundPlayer();
+        }
+        
+        function closeFocusSoundsModal() {
+            document.getElementById('focus-sounds-modal').classList.remove('active');
+            // Stop sound preview when closing modal
+            stopSoundPreview();
+        }
+        
+        function selectSoundOption(element) {
+            document.querySelectorAll('.sound-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            selectedSound = element.getAttribute('data-sound');
+            
+            // Update sound player
+            toggleSoundPlayer();
+            
+            // If a sound is selected, start preview
+            if (selectedSound !== 'none') {
+                playSoundPreview();
+            } else {
+                stopSoundPreview();
+            }
+        }
+        
+        function toggleSoundPlayer() {
+            const soundPlayer = document.getElementById('sound-player');
+            if (selectedSound !== 'none') {
+                soundPlayer.style.display = 'flex';
+                document.getElementById('now-playing').textContent = `Now Playing: ${getSoundName(selectedSound)}`;
+            } else {
+                soundPlayer.style.display = 'none';
+            }
+        }
+        
+        function getSoundName(sound) {
+            const soundNames = {
+                'none': 'No Sound',
+                'rain': 'Rainfall',
+                'forest': 'Forest',
+                'coffee': 'Coffee Shop',
+                'waves': 'Ocean Waves',
+                'lofi': 'Lofi Beats'
+            };
+            return soundNames[sound] || 'Unknown';
+        }
+        
+        function playSoundPreview() {
+            // In a real implementation, this would play actual audio
+            // For this demo, we'll just simulate it
+            soundPlaying = true;
+            document.getElementById('play-pause-sound').innerHTML = '<i class="fas fa-pause"></i>';
+            // Simulate audio playing
+        }
+        
+        function stopSoundPreview() {
+            soundPlaying = false;
+            document.getElementById('play-pause-sound').innerHTML = '<i class="fas fa-play"></i>';
+            // Simulate audio stopping
+        }
+        
+        function toggleSoundPlayback() {
+            if (soundPlaying) {
+                stopSoundPreview();
+            } else {
+                playSoundPreview();
+            }
+        }
+        
+        function applyFocusSound() {
+            // Save the selected sound preference
+            console.log(`Focus sound set to: ${selectedSound}`);
+            closeFocusSoundsModal();
+        }
+
+        // Enhanced Break Settings
+        function showBreakSettingsModal() {
+            document.getElementById('break-settings-modal').classList.add('active');
+            
+            // Set current values
+            document.getElementById('break-duration').value = breakDuration / 60;
+            document.getElementById('auto-start-breaks').checked = autoStartBreaks;
+            
+            // Set frequency option
+            const frequencyInMinutes = breakFrequency / 60;
+            document.querySelectorAll('.frequency-option').forEach(option => {
+                if (parseInt(option.getAttribute('data-minutes')) === frequencyInMinutes) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+        }
+        
+        function closeBreakSettingsModal() {
+            document.getElementById('break-settings-modal').classList.remove('active');
+        }
+        
+        function showCustomFrequency() {
+            document.getElementById('custom-frequency-row').style.display = 'flex';
+            document.querySelectorAll('.frequency-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+        }
+        
+        function saveBreakSettings() {
+            breakDuration = parseInt(document.getElementById('break-duration').value) * 60;
+            autoStartBreaks = document.getElementById('auto-start-breaks').checked;
+            
+            // Get frequency
+            const selectedFrequency = document.querySelector('.frequency-option.selected');
+            if (selectedFrequency) {
+                breakFrequency = parseInt(selectedFrequency.getAttribute('data-minutes')) * 60;
+            } else {
+                // Custom frequency
+                breakFrequency = parseInt(document.getElementById('custom-frequency').value) * 60;
+            }
+            
+            closeBreakSettingsModal();
+            alert('Break settings saved successfully!');
+        }
+
+        // Timer preset selection
+        document.querySelectorAll('.timer-preset').forEach(preset => {
+            preset.addEventListener('click', function() {
+                if (this.getAttribute('data-minutes')) {
+                    document.querySelectorAll('.timer-preset').forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    if (!timerRunning) {
+                        const minutes = parseInt(this.getAttribute('data-minutes'));
+                        timerSeconds = minutes * 60;
+                        updateTimerDisplay();
+                        updateProgressRing();
+                    }
+                }
+            });
+        });
+
+        // Initialize
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerSeconds / 60);
+            const seconds = timerSeconds % 60;
+            document.getElementById('timer-display').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Event listeners for sound player
+        document.getElementById('play-pause-sound').addEventListener('click', toggleSoundPlayback);
+        
+        // Frequency option selection
+        document.querySelectorAll('.frequency-option').forEach(option => {
+            if (option.getAttribute('data-minutes')) {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.frequency-option').forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    document.getElementById('custom-frequency-row').style.display = 'none';
+                });
+            }
+        });
+
+        // Page Navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show the requested page
+            document.getElementById(`page-${pageId}`).classList.add('active');
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+            
+            // Update URL
+            window.location.hash = pageId;
+        }
+
+        function startFocusSession() {
+            showPage('focus');
+        }
+
+        // Check URL hash on load
+        window.addEventListener('load', () => {
+            initTheme();
+            
+            if (window.location.hash) {
+                const pageId = window.location.hash.substring(1);
+                if (document.getElementById(`page-${pageId}`)) {
+                    showPage(pageId);
+                }
+            }
+            
+            // Initialize the app
+            updateTimerDisplay();
+            updateProgressRing();
+            updateSessionHistoryDisplay();
+        });
+
+        // Modal functionality
+        function showModal(title, content) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-content').innerHTML = content;
+            document.getElementById('modal-overlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+        }
+
+        // Health & Wellness functions
+        function generateDailyChallenge() {
+            const challenges = [
+                "Take a 15-minute walk without your phone today",
+                "Read a physical book for 20 minutes instead of scrolling",
+                "Have a device-free meal with someone you care about",
+                "Practice 10 minutes of mindfulness or meditation",
+                "Write down three things you're grateful for in a journal",
+                "Try a new hobby that doesn't involve screens for 30 minutes",
+                "Call a friend or family member instead of texting",
+                "Do a digital declutter: organize your phone's home screen"
+            ];
+            
+            const randomChallenge = challenges[Math.floor(Math.random() * challenges.length)];
+            
+            return `
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 3rem; color: var(--primary); margin-bottom: 20px;">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <h3 style="margin-bottom: 16px;">Your Daily Wellness Challenge</h3>
+                    <p style="margin-bottom: 24px; font-size: 1.1rem; color: var(--text-secondary);">${randomChallenge}</p>
+                    <button class="btn btn-primary" onclick="closeModal()">I'll Do It!</button>
+                </div>
+            `;
+        }
+
+        // Demo functions
+        function showMindfulReminder() {
+            showModal('Mindful Browsing', `
+                <p>Focus Guardian would gently remind you when you've been browsing for an extended period:</p>
+                <div style="background: var(--background); padding: 20px; border-radius: 12px; margin: 20px 0;">
+                    <h3>Time for a break?</h3>
+                    <p>You've been on this site for 25 minutes. How about taking a short break?</p>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button class="btn btn-primary" onclick="closeModal()">Take a Break</button>
+                        <button class="btn btn-secondary" onclick="closeModal()">Continue Browsing</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function showResearchModal(type) {
+            let title, content;
+            
+            switch(type) {
+                case 'neuroscience':
+                    title = 'Neuroscience Foundation';
+                    content = `
+                        <p>Focus Guardian uses principles from behavioral neuroscience to help reshape digital habits:</p>
+                        <ul style="margin: 15px 0; padding-left: 20px;">
+                            <li>Dopamine regulation techniques to reduce compulsive checking</li>
+                            <li>Attention restoration theory to combat digital fatigue</li>
+                            <li>Implementation intention strategies to build better habits</li>
+                        </ul>
+                        <p>These approaches are backed by research in cognitive psychology and behavioral science.</p>
+                    `;
+                    break;
+                case 'adaptation':
+                    title = 'Adaptive Learning';
+                    content = `
+                        <p>Focus Guardian learns from your behavior patterns to provide personalized interventions:</p>
+                        <ul style="margin: 15px 0; padding-left: 20px;">
+                            <li>Identifies your most distracting websites and apps</li>
+                            <li>Learns your productive times of day</li>
+                            <li>Adapts reminder frequency based on your responsiveness</li>
+                            <li>Customizes intervention types to what works best for you</li>
+                        </ul>
+                    `;
+                    break;
+                case 'privacy':
+                    title = 'Privacy First Approach';
+                    content = `
+                        <p>Your privacy is our priority. Focus Guardian is designed with a privacy-first approach:</p>
+                        <ul style="margin: 15px 0; padding-left: 20px;">
+                            <li>All data is processed locally on your device whenever possible</li>
+                            <li>We never sell your personal information or browsing data</li>
+                            <li>Any cloud sync is encrypted end-to-end</li>
+                            <li>You have full control over what data is collected</li>
+                        </ul>
+                    `;
+                    break;
+            }
+            
+            showModal(title, content);
+        }
+
+        function enableWebsiteBlocking() {
+            showModal('Website Blocking', `
+                <p>Focus Guardian can help you block distracting websites during focus sessions:</p>
+                <div style="margin: 20px 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border);">
+                        <span>Social Media</span>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border);">
+                        <span>News Sites</span>
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+                        <span>Entertainment</span>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="width: 100%;" onclick="closeModal()">Save Settings</button>
+            `);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('modal-overlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Enhanced interactions and animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate progress bars when they come into view
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animated');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.progress-bar').forEach(bar => {
+                observer.observe(bar);
+            });
+
+            // Interactive feature items
+            document.querySelectorAll('.feature-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                });
+            });
+
+            // Demo card interactions
+            document.querySelectorAll('.demo-card').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    if (!e.target.closest('.btn')) {
+                        this.classList.toggle('active');
+                    }
+                });
+            });
+
+            // Adaptive header
+            const header = document.querySelector('header');
+            let lastScrollY = window.scrollY;
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > lastScrollY && window.scrollY > 100) {
+                    header.style.transform = 'translateY(-100%)';
+                } else {
+                    header.style.transform = 'translateY(0)';
+                }
+                lastScrollY = window.scrollY;
+            });
+
+            // Reduced motion preference
+            const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (reducedMotion) {
+                document.body.classList.add('reduced-motion');
+            }
+        });
+    </script>
+</body>
+</html>
